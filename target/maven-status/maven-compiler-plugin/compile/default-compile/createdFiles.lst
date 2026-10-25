@@ -1,0 +1,12 @@
+com\hrm\HrmApplication.class
+com\hrm\model\AuditTrail.class
+com\hrm\model\LeaveRequest.class
+com\hrm\repository\LeaveRepository.class
+com\hrm\model\JobListing.class
+com\hrm\repository\AuditRepository.class
+com\hrm\model\Notification.class
+com\hrm\controller\HrmApiController.class
+com\hrm\repository\JobListingRepository.class
+com\hrm\repository\UserRepository.class
+com\hrm\repository\NotificationRepository.class
+com\hrm\model\User.class

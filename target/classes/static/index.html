@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scalable Enterprise HRM System & System Design Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">⚡</div>
+                <h2>AuraHR System</h2>
+            </div>
+            
+            <div class="role-selector">
+                <label>Active Persona (Role Access)</label>
+                <select id="roleSelect" onchange="switchRole()">
+                    <option value="HR_ADMIN">HR Admin (Carol)</option>
+                    <option value="MANAGER">Manager (Bob)</option>
+                    <option value="RECRUITER">Recruiter (David)</option>
+                    <option value="EMPLOYEE">Employee (Alice)</option>
+                </select>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-btn active" onclick="showTab('dashboard')">📊 Overview & Search</button>
+                <button class="nav-btn" onclick="showTab('leave')">📅 Leave Center</button>
+                <button class="nav-btn hr-only" onclick="showTab('analytics')">📈 HR Analytics</button>
+                <button class="nav-btn hr-only" onclick="showTab('recruitment')">💼 Recruitment & Crawler</button>
+                <button class="nav-btn hr-only" onclick="showTab('audit')">🛡️ Audit Trail</button>
+                <button class="nav-btn" onclick="showTab('selfservice')">👤 Self-Service Portal</button>
+                <button class="nav-btn" onclick="showTab('documents')">📁 Document Storage</button>
+                <button class="nav-btn" onclick="showTab('notifications')">🔔 Notifications (Email/SMS)</button>
+                <button class="nav-btn" onclick="showTab('scalability')">🌐 Scalability & Failure Demo</button>
+            </nav>
+
+            <div class="db-badge">
+                <span class="pulse-dot"></span> Persistent Engine Active
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="header-title">
+                    <h1 id="pageTitle">Enterprise HRM System Design Dashboard</h1>
+                    <p id="roleDesc" class="subtitle">SSN UCS3513 System Design Laboratory Prototype</p>
+                </div>
+                <div class="user-pill">
+                    <span id="currentUserLabel">Carol Williams (HR Admin)</span>
+                </div>
+            </header>
+
+            <section id="dashboard" class="tab-view active">
+                <div class="card mb-20">
+                    <h3>🔍 Autocomplete Search Engine (Component 8)</h3>
+                    <p class="subtitle">Search employees or departments with sub-millisecond prefix matching:</p>
+                    <input type="text" id="autoCompleteInput" class="input-field mt-10" placeholder="Type name or department (e.g. 'Alice', 'Eng')..." oninput="handleSearch(this.value)">
+                    <div id="searchResults" class="search-dropdown mt-10"></div>
+                </div>
+
+                <div class="grid-cards">
+                    <div class="card stat-card">
+                        <h3>Total Staff</h3>
+                        <p class="stat-val" id="totalStaffVal">4</p>
+                        <span class="trend positive">Distributed across 3 Shards</span>
+                    </div>
+                    <div class="card stat-card">
+                        <h3>Pending Leaves</h3>
+                        <p class="stat-val" id="pendingLeaveVal">1</p>
+                        <span class="trend warning">Action Required</span>
+                    </div>
+                    <div class="card stat-card">
+                        <h3>Attendance Rate</h3>
+                        <p class="stat-val">96.4%</p>
+                        <span class="trend positive">High Engagement</span>
+                    </div>
+                    <div class="card stat-card">
+                        <h3>Payroll Budget</h3>
+                        <p class="stat-val" id="totalPayrollVal">$362,000</p>
+                        <span class="trend neutral">Monthly Allocated</span>
+                    </div>
+                </div>
+
+                <div class="card table-card mt-20">
+                    <h3>Employee Roster with Snowflake Unique IDs &amp; Shard Mapping</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>System Unique ID</th><th>Name</th><th>Role</th><th>Department</th><th>Shard Node</th><th>Salary</th></tr>
+                        </thead>
+                        <tbody id="rosterTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="leave" class="tab-view">
+                <div class="card">
+                    <h3>Request Leave (Employee Self-Service)</h3>
+                    <form id="leaveForm" class="inline-form" onsubmit="handleLeaveSubmit(event)">
+                        <select id="leaveType"><option>Annual Leave</option><option>Sick Leave</option><option>Personal</option></select>
+                        <input type="date" id="leaveStart" required>
+                        <input type="date" id="leaveEnd" required>
+                        <input type="text" id="leaveReason" placeholder="Reason" required>
+                        <button type="submit" class="btn-primary">Submit Request</button>
+                    </form>
+                </div>
+                <div class="card table-card mt-20">
+                    <h3>Leave Approval Dashboard (Pending &amp; Recent Requests)</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>ID</th><th>Employee</th><th>Type</th><th>Dates</th><th>Status</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="leaveTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="analytics" class="tab-view">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Department Headcount Breakdown</h3>
+                        <canvas id="deptChart"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>Employee Performance Distribution</h3>
+                        <canvas id="perfChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="recruitment" class="tab-view">
+                <div class="card">
+                    <h3>🕷️ External Job Portal Web Crawler (Component 7) &amp; URL Shortener (Component 6)</h3>
+                    <p class="subtitle">Simulate external portal crawling to collect job listings and generate short links:</p>
+                    <button class="btn-primary mt-10" onclick="triggerCrawler()">Run Web Crawler Bot</button>
+                    <div id="crawlerStatus" class="mt-10 text-success"></div>
+                </div>
+
+                <div class="card table-card mt-20">
+                    <h3>Crawled Job Listings &amp; Shortened Recruitment Links</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Job Title</th><th>Company</th><th>Location</th><th>Source Portal</th><th>Short URL</th></tr>
+                        </thead>
+                        <tbody id="jobTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="audit" class="tab-view">
+                <div class="card table-card">
+                    <h3>🛡️ System Audit Trail (Action Logging)</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Timestamp</th><th>User / Actor</th><th>Action</th><th>Details</th></tr>
+                        </thead>
+                        <tbody id="auditTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="selfservice" class="tab-view">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Employee Self-Service Profile Update</h3>
+                        <form id="profileForm" onsubmit="updateProfile(event)">
+                            <label>Name</label><input type="text" id="profName" class="input-field" value="Alice Smith">
+                            <label>Department</label><input type="text" id="profDept" class="input-field" value="Engineering">
+                            <label>Email</label><input type="email" id="profEmail" class="input-field" value="alice@company.com">
+                            <button type="submit" class="btn-primary mt-10">Save Changes</button>
+                        </form>
+                    </div>
+                    <div class="card">
+                        <h3>Payslip Generation &amp; Export Receipt</h3>
+                        <p>Generate downloadable payroll receipts for current month:</p>
+                        <div class="btn-group mt-20">
+                            <button class="btn-outline" onclick="exportPayslip('csv')">📄 Download Payslip (CSV)</button>
+                            <button class="btn-primary" onclick="exportPayslip('pdf')">📥 Download Payslip (PDF)</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="documents" class="tab-view">
+                <div class="card">
+                    <h3>📁 Document Storage &amp; Candidate Resume Uploads</h3>
+                    <form onsubmit="uploadDoc(event)" class="mt-10">
+                        <input type="file" id="fileInput" required>
+                        <button type="submit" class="btn-primary">Upload File</button>
+                    </form>
+                    <div id="uploadStatus" class="mt-10 text-success"></div>
+                </div>
+            </section>
+
+            <section id="notifications" class="tab-view">
+                <div class="card table-card">
+                    <h3>🔔 Simulated Email &amp; SMS Notification Queue</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Recipient</th><th>Channel</th><th>Message</th><th>Delivery Status</th></tr>
+                        </thead>
+                        <tbody id="notifTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="scalability" class="tab-view">
+                <div class="grid-cards">
+                    <div class="card stat-card">
+                        <h3>Key-Value Store Hit Rate</h3>
+                        <p class="stat-val highlight-cyan" id="kvHitRate">94.2%</p>
+                        <span class="trend positive">Lookup Latency: 1.2ms</span>
+                    </div>
+                    <div class="card stat-card">
+                        <h3>Rate Limiter Rejection</h3>
+                        <p class="stat-val warning" id="rlRejection">2.1%</p>
+                        <span class="trend neutral">Token Bucket (15 req/10s)</span>
+                    </div>
+                    <div class="card stat-card">
+                        <h3>ID Generator Rate</h3>
+                        <p class="stat-val" id="idGenRate">15,000/s</p>
+                        <span class="trend positive">0 Collisions</span>
+                    </div>
+                    <div class="card stat-card">
+                        <h3>Crawler Throughput</h3>
+                        <p class="stat-val">45 p/s</p>
+                        <span class="trend positive">Redirect Latency: 0.8ms</span>
+                    </div>
+                </div>
+
+                <div class="card mt-20">
+                    <h3>📊 System Workload Benchmark Evaluation (Low, Med, High Workloads)</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Workload Level</th><th>Avg Response Time</th><th>Throughput (req/sec)</th><th>Error / Rejection Rate</th></tr>
+                        </thead>
+                        <tbody id="workloadTable"></tbody>
+                    </table>
+                </div>
+
+                <div class="card mt-20">
+                    <h3>Live Simulated Server Node Health &amp; Failover Panel (Consistent Hashing Ring)</h3>
+                    <div id="serverNodes" class="server-grid mt-10"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="/js/app.js"></script>
+</body>
+</html>
